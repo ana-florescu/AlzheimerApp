@@ -69,6 +69,7 @@
             android:layout_column="1"
             android:layout_columnWeight="1"
             android:layout_gravity="fill"
+            android:onClick="openPills"
             app:cardCornerRadius="8dp"
             app:cardElevation="8dp"
             app:cardUseCompatPadding="true">
@@ -139,7 +140,7 @@
             android:layout_column="1"
             android:layout_columnWeight="1"
             android:layout_gravity="fill"
-            android:onClick="openMenuFeelings"
+            android:onClick="openCamera"
             app:cardCornerRadius="8dp"
             app:cardElevation="8dp"
             app:cardUseCompatPadding="true">
@@ -154,12 +155,12 @@
                 <ImageView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:src="@drawable/emotions" />
+                    android:src="@drawable/camera" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="FEELINGS"
+                    android:text="CAMERA"
                     android:textAlignment="center"
                     android:textStyle="bold"
                     android:gravity="center_horizontal" />
@@ -210,6 +211,7 @@
             android:layout_column="1"
             android:layout_columnWeight="1"
             android:layout_gravity="fill"
+            android:onClick="openMap"
             app:cardCornerRadius="8dp"
             app:cardElevation="8dp"
             app:cardUseCompatPadding="true">
@@ -224,12 +226,12 @@
                 <ImageView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:src="@drawable/settings" />
+                    android:src="@drawable/map" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SETTINGS"
+                    android:text="MAP"
                     android:textAlignment="center"
                     android:textStyle="bold"
                     android:gravity="center_horizontal" />

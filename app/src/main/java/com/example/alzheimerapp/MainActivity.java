@@ -18,13 +18,23 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MenuInteractive.class);
         startActivity(intent);
     }
-    public void openMenuFeelings(View view){
-        Intent intent = new Intent(this, MenuFeelings.class);
+    public void openCamera(View view){
+        Intent intent = new Intent(this, UnsureActivity.class);
         startActivity(intent);
     }
 
     public void openMusic(View view){
         Intent intent = new Intent(this, MusicActivity.class);
+        startActivity(intent);
+    }
+
+    public void openPills(View view){
+        Intent intent = new Intent(this, PillsActivity.class);
+        startActivity(intent);
+    }
+
+    public void openMap(View view){
+        Intent intent = new Intent(this, LostActivity.class);
         startActivity(intent);
     }
 

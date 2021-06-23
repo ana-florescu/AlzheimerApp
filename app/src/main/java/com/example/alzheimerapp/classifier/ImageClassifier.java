@@ -23,11 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * The class that performs image classification usign tensor flow model
- * <p>
- * Created by A Anand on 11-05-2020
- */
 public class ImageClassifier {
 
     /**

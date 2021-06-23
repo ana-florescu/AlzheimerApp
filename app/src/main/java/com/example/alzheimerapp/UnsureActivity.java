@@ -3,11 +3,15 @@ package com.example.alzheimerapp;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -15,162 +19,153 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.alzheimerapp.classifier.ImageClassifier;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class UnsureActivity extends AppCompatActivity {
 
-    /**
-     * Requests Codes to identify camera and permission requests
-     */
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 1000;
-    private static final int CAMERA_REQEUST_CODE = 10001;
+    EditText etSubject, etThoughts;
+    Button btnAddPhoto, btnAddToFeed, btnSeeFeed, btnRetrospective;
+    ImageView ivPhoto;
 
-    /**
-     * UI Elements
-     */
-    private ImageView imageView;
-    private ListView listView;
-    private ImageClassifier imageClassifier;
+    final int REQUEST_CODE_GALLERY= 999;
+
+    public static SQLiteHelper sqLiteHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_unsure);
 
-        // initalizing ui elements
-        initializeUIElements();
-    }
+        init();
 
-    /**
-     * Method to initalize UI Elements. this method adds the on click
-     */
-    private void initializeUIElements() {
-        imageView = findViewById(R.id.iv_capture);
-        listView = findViewById(R.id.lv_probabilities);
-        Button takepicture = findViewById(R.id.bt_take_picture);
+        sqLiteHelper = new SQLiteHelper(this, "FeedDB.sqlite", null, 1);
 
-        /*
-         * Creating an instance of our tensor image classifier
-         */
-        try {
-            imageClassifier = new ImageClassifier(this);
-        } catch (IOException e) {
-            Log.e("Image Classifier Error", "ERROR: " + e);
-        }
+        sqLiteHelper.queryData("CREATE TABLE IF NOT EXISTS FEED (Id INTEGER PRIMARY KEY AUTOINCREMENT, subject VARCHAR, text VARCHAR, image BLOG ) ");
 
-        // adding on click listener to button
-        takepicture.setOnClickListener(new View.OnClickListener() {
+        btnAddPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // checking whether camera permissions are available.
-                // if permission is avaialble then we open camera intent to get picture
-                // otherwise reqeusts for permissions
-                if (hasPermission()) {
-                    openCamera();
-                } else {
-                    requestPermission();
+                ActivityCompat.requestPermissions(
+                        UnsureActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        REQUEST_CODE_GALLERY
+
+                );
+            }
+        });
+
+        btnAddToFeed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    byte[] byteArray2 = imageViewToByte(ivPhoto);
+                    if(byteArray2.length > 0 ) {
+                        sqLiteHelper.insertData(
+                                etSubject.getText().toString().trim(),
+                                etThoughts.getText().toString().trim(),
+                                imageViewToByte(ivPhoto)
+
+                        );
+                    }
+                    Toast.makeText(getApplicationContext(), "Added succsesfully!!", Toast.LENGTH_SHORT).show();
+                    etSubject.setText("");
+                    etThoughts.setText("");
+                    ivPhoto.setImageResource(R.mipmap.ic_launcher);
+
                 }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        btnSeeFeed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(UnsureActivity.this, FeedList.class);
+                startActivity(intent);
+            }
+        });
+
+        btnRetrospective.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(UnsureActivity.this, Retrospective.class);
+                startActivity(intent);
             }
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        // if this is the result of our camera image request
-        if (requestCode == CAMERA_REQEUST_CODE) {
-            // getting bitmap of the image
-            Bitmap photo = (Bitmap) Objects.requireNonNull(Objects.requireNonNull(data).getExtras()).get("data");
-            // displaying this bitmap in imageview
-            imageView.setImageBitmap(photo);
+    private byte[] imageViewToByte(ImageView image) throws IOException {
 
-            // pass this bitmap to classifier to make prediction
-            List<ImageClassifier.Recognition> predicitons = imageClassifier.recognizeImage(
-                    photo, 0);
+        byte[] byteArray = new byte[0];
+        Bitmap bitmap = ((BitmapDrawable)image.getDrawable()).getBitmap();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG,100, stream);
+        byteArray = stream.toByteArray();
+        return byteArray;
 
-            // creating a list of string to display in list view
-            final List<String> predicitonsList = new ArrayList<>();
-            for (ImageClassifier.Recognition recog : predicitons) {
-                predicitonsList.add(recog.getName() + "  has found in a percent of  " + recog.getConfidence()*100 + "%");
-            }
-
-            // creating an array adapter to display the classification result in list view
-            ArrayAdapter<String> predictionsAdapter = new ArrayAdapter<>(
-                    this, R.layout.support_simple_spinner_dropdown_item, predicitonsList);
-            listView.setAdapter(predictionsAdapter);
-
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == REQUEST_CODE_GALLERY) {
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                startActivityForResult(intent, REQUEST_CODE_GALLERY);
+            }
+            else{
+                Toast.makeText(getApplicationContext(), "You don't have permission!!", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // if this is the result of our camera permission request
-        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
-            if (hasAllPermissions(grantResults)) {
-                openCamera();
-            } else {
-                requestPermission();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode == REQUEST_CODE_GALLERY && resultCode == RESULT_OK && data != null ){
+            Uri uri = data.getData();
+
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                ivPhoto.setImageBitmap(bitmap);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
         }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
-    /**
-     * checks whether all the needed permissions have been granted or not
-     *
-     * @param grantResults the permission grant results
-     * @return true if all the reqested permission has been granted,
-     * otherwise returns false
-     */
-    private boolean hasAllPermissions(int[] grantResults) {
-        for (int result : grantResults) {
-            if (result == PackageManager.PERMISSION_DENIED)
-                return false;
-        }
-        return true;
+    private void init(){
+
+
+        etSubject = (EditText) findViewById(R.id.etSubject);
+        etThoughts = (EditText) findViewById(R.id.etThoughts);
+        btnAddPhoto = (Button) findViewById(R.id.btnAddPhoto);
+        btnAddToFeed = (Button) findViewById(R.id.btnAddFeed);
+        btnSeeFeed = (Button) findViewById(R.id.btnSeeFeed);
+        btnRetrospective = (Button) findViewById(R.id.btnRetrospective);
+        ivPhoto = (ImageView) findViewById(R.id.ivPhoto);
+
     }
 
-    /**
-     * Method requests for permission if the android version is marshmallow or above
-     */
-    private void requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // whether permission can be requested or on not
-            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-                Toast.makeText(this, "Camera Permission Required", Toast.LENGTH_SHORT).show();
-            }
-            // request the camera permission permission
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
-        }
-    }
-
-    /**
-     * creates and starts an intent to get a picture from camera
-     */
-    private void openCamera() {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(cameraIntent, CAMERA_REQEUST_CODE);
-    }
-
-    /**
-     * checks whether camera permission is available or not
-     *
-     * @return true if android version is less than marshmallo,
-     * otherwise returns whether camera permission has been granted or not
-     */
-    private boolean hasPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
-        }
-        return true;
-    }
-}
+  }

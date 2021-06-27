@@ -42,7 +42,7 @@ public class DirectionFinder {
         String urlOrigin = URLEncoder.encode(origin, "utf-8");
         String urlDestination = URLEncoder.encode(destination, "utf-8");
 
-        return DIRECTION_URL_API + "origin=" + urlOrigin + "&destination=" + urlDestination + "&key=" + "AIzaSyDuV0NrgcGB11kXl2DQolYzpMtLrkOxVfo";
+        return DIRECTION_URL_API + "origin=" + urlOrigin + "&destination=" + urlDestination + "&key=" + "AIzaSyCFV9-YcBL58NAEoqC4Bsut9Otf_-BL9ns";
     }
 
     private class DownloadRawData extends AsyncTask<String, Void, String> {

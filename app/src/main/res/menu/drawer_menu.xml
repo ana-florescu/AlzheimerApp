@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single"
+        android:id="@+id/group1">
+        <item android:id="@+id/meniuMap"
+            android:icon="@drawable/ic_baseline_home_24"
+            android:title="Map">
+        </item>
+        <item android:id="@+id/meniuGallery"
+            android:icon="@drawable/ic_baseline_people_24"
+            android:title="Gallery">
+        </item>
+        </group>
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/groupPills">
+        <item android:id="@+id/meniuPills"
+            android:icon="@drawable/ic_baseline_smartphone_24"
+            android:title="Pills Alarm">
+        </item>
+        <item android:id="@+id/meniuReportPills"
+            android:icon="@drawable/ic_baseline_share_24"
+            android:title="Report Pills">
+        </item>
+    </group>
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/groupInteractive">
+        <item android:id="@+id/meniuQuiz"
+            android:icon="@drawable/ic_baseline_policy_24"
+            android:title="Quiz">
+        </item>
+        <item android:id="@+id/meniuPaint"
+            android:icon="@drawable/ic_baseline_policy_24"
+            android:title="Paint">
+        </item>
+    </group>
+
+</menu>

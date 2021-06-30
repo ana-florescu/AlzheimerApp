@@ -15,12 +15,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.alzheimerapp.databasePills.DatabaseClass;
 import com.example.alzheimerapp.databasePills.EntityClass;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -28,12 +27,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 public class CreateEvent extends AppCompatActivity implements View.OnClickListener{
     Button btn_time, btn_date, btn_done;
     EditText editext_message;
     String timeTonotify;
-    DatabaseClass databaseClass;
+
+    private FirebaseFirestore firebaseFirestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +47,7 @@ public class CreateEvent extends AppCompatActivity implements View.OnClickListen
         btn_time.setOnClickListener(this);
         btn_date.setOnClickListener(this);
         btn_done.setOnClickListener(this);
-        databaseClass = DatabaseClass.getDatabase(getApplicationContext());
+        firebaseFirestore = FirebaseFirestore.getInstance();
 
     }
 
@@ -76,8 +77,15 @@ public class CreateEvent extends AppCompatActivity implements View.OnClickListen
                 entityClass.setEventdate(date);
                 entityClass.setEventname(value);
                 entityClass.setEventtime(time);
-                databaseClass.EventDao().insertAll(entityClass);
+                HashMap<String, String> pillsCollection = new HashMap<>();
+                pillsCollection.put("pillName", value);
+                pillsCollection.put("pillDate", date);
+                pillsCollection.put("pillTime", time);
+                firebaseFirestore.collection("pillTable").add(pillsCollection);
                 setAlarm(value, date, time);
+
+                Intent intent = new Intent(getApplicationContext(), PillsActivity.class);
+                startActivity(intent);
             }
         }
     }
@@ -171,7 +179,6 @@ public class CreateEvent extends AppCompatActivity implements View.OnClickListen
             e.printStackTrace();
         }
 
-        finish();
 
     }
 }

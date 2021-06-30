@@ -56,15 +56,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
           //  delete.setOnClickListener(this);
 
         }
-        @Override
-        public void onClick(View v){
-            EntityClass ec = new EntityClass();
-            int ID = entityClasses.get(getAdapterPosition()).getId();
-            ec.setId(ID);
-           // removeAt(getAdapterPosition());
-//            PillsActivity.data
-        }
 
+        @Override
+        public void onClick(View v) {
+
+        }
     }
 
     public void removeAt(int position) {

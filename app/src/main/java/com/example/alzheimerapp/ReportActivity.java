@@ -1,11 +1,12 @@
 package com.example.alzheimerapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Color;
 import android.os.Bundle;
 
-import com.example.alzheimerapp.databasePills.DatabaseClass;
+import com.example.alzheimerapp.adapter.EventAdapter;
 import com.example.alzheimerapp.databasePills.EntityClass;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
@@ -13,25 +14,40 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReportActivity extends AppCompatActivity {
     PieChart pieChart;
-List<EntityClass> dates;
+    List<EntityClass> dates;
+
+    private FirebaseFirestore mFirestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
         pieChart = findViewById(R.id.pieChart);
-        DatabaseClass databaseClass = DatabaseClass.getDatabase(getApplicationContext());
-        dates = databaseClass.EventDao().getAllData();
+        dates = new ArrayList<EntityClass>();
+//        DatabaseClass databaseClass = DatabaseClass.getDatabase(getApplicationContext());
+//        dates = databaseClass.EventDao().getAllData();
+        mFirestore = FirebaseFirestore.getInstance();
         setUpPieChart();
-        loadPieChartData();
+        readData(new FirestoreCallback() {
+            @Override
+            public void onCallBack(List<EntityClass> list) {
+                loadPieChartData();
+            }
+        });
+
+
     }
 
     private void setUpPieChart(){
@@ -80,5 +96,28 @@ List<EntityClass> dates;
         pieChart.setData(data);
         pieChart.invalidate();
         pieChart.animateY(1400, Easing.EaseInOutQuad);
+    }
+
+
+    private void readData(FirestoreCallback firestoreCallback){
+        mFirestore.collection("pillTable").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                for(DocumentSnapshot doc : task.getResult()){
+                    String name = doc.getString("pillName");
+                    String date = doc.getString("pillDate");
+                    String time = doc.getString("pillTime");
+                    EntityClass entityClass = new EntityClass(name, date, time);
+                    dates.add(entityClass);
+
+                }
+                firestoreCallback.onCallBack(dates);
+            }
+        });
+    }
+
+    private interface FirestoreCallback {
+        void onCallBack(List<EntityClass> list);
     }
 }

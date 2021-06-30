@@ -3,7 +3,7 @@
     style="@style/ThemeOverlay.AppCompat.Dark"
     android:layout_width="match_parent"
     android:layout_height="172dp"
-    android:background="@drawable/slicedback"
+    android:background="#FF5722"
     android:padding="25dp">
 
 

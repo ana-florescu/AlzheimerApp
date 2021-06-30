@@ -7,34 +7,26 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import com.example.alzheimerapp.adapter.EventAdapter;
-import com.example.alzheimerapp.databasePills.DatabaseClass;
 import com.example.alzheimerapp.databasePills.EntityClass;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 
 public class PillsActivity extends AppCompatActivity {
     Button createEvent;
     EventAdapter eventAdapter;
     RecyclerView recyclerview;
-    DatabaseClass databaseClass;
+     ArrayList<EntityClass> list;
+
+    private FirebaseFirestore mFirestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +35,7 @@ public class PillsActivity extends AppCompatActivity {
         createEvent = findViewById(R.id.btn_createEvent);
         recyclerview = findViewById(R.id.recyclerview);
         recyclerview.setLayoutManager(new LinearLayoutManager(this));
+        list = new ArrayList<EntityClass>();
         createEvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,36 +43,35 @@ public class PillsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        databaseClass = DatabaseClass.getDatabase(getApplicationContext());
-    }
+        mFirestore = FirebaseFirestore.getInstance();
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setAdapter();
 
-    }
-
-    private void setAdapter() {
-        List<EntityClass> classList = databaseClass.EventDao().getAllData();
-        eventAdapter = new EventAdapter(getApplicationContext(), classList);
+        readData();
+        eventAdapter = new EventAdapter(getApplicationContext(), list);
         recyclerview.setAdapter(eventAdapter);
+        eventAdapter.notifyDataSetChanged();
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.main_menu, menu);
-        return true;
+
+    private void readData() {
+        mFirestore.collection("pillTable").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                for(DocumentSnapshot doc : task.getResult()){
+                    String name = doc.getString("pillName");
+                    String date = doc.getString("pillDate");
+                    String time = doc.getString("pillTime");
+                    EntityClass entityClass = new EntityClass(name, date, time);
+                    list.add(entityClass);
+                    eventAdapter = new EventAdapter(getApplicationContext(), list);
+                    recyclerview.setAdapter(eventAdapter);
+                   // eventAdapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.report) {
-            Intent intent = new Intent(this, ReportActivity.class);
-            startActivity(intent);
-        }
-        return true;
-    }
+
 }

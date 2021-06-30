@@ -1,20 +1,14 @@
 package com.example.alzheimerapp.databasePills;
 
 import androidx.annotation.NonNull;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 
-@Entity(tableName = "myTable")
+
+
 public class EntityClass {
-    @PrimaryKey(autoGenerate = true)
-    int id;
-    @ColumnInfo(name = "eventname")
-    String eventname;
-    @ColumnInfo(name = "eventdate")
-    String eventdate;
-    @ColumnInfo(name = "eventtime")
 
+
+    String eventname;
+    String eventdate;
     String eventtime;
 
     public EntityClass(String eventname, String eventdate, String eventtime) {
@@ -55,13 +49,6 @@ public class EntityClass {
         this.eventtime = eventtime;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     @NonNull
     @Override

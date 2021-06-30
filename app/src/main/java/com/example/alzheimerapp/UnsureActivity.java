@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class UnsureActivity extends AppCompatActivity {
+public class     UnsureActivity extends AppCompatActivity {
 
     EditText etSubject, etThoughts;
     Button btnAddPhoto, btnAddToFeed, btnSeeFeed, btnRetrospective;

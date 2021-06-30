@@ -8,7 +8,7 @@ import android.widget.GridView;
 
 import java.util.ArrayList;
 
-public class FeedList extends AppCompatActivity {
+public class   FeedList extends AppCompatActivity {
     GridView gridView;
     ArrayList<Feed> list;
     FeedAdapter adapter = null;

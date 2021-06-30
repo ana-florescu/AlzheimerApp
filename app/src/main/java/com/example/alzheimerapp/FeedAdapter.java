@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class FeedAdapter extends BaseAdapter {
+public class   FeedAdapter extends BaseAdapter {
     private Context context;
     private int layout;
     private ArrayList<Feed> feedList;

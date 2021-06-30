@@ -36,8 +36,7 @@ public class ReportActivity extends AppCompatActivity {
         setContentView(R.layout.activity_report);
         pieChart = findViewById(R.id.pieChart);
         dates = new ArrayList<EntityClass>();
-//        DatabaseClass databaseClass = DatabaseClass.getDatabase(getApplicationContext());
-//        dates = databaseClass.EventDao().getAllData();
+
         mFirestore = FirebaseFirestore.getInstance();
         setUpPieChart();
         readData(new FirestoreCallback() {
